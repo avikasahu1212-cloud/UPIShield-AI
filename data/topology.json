@@ -1,0 +1,37 @@
+{
+  "nodes": [
+    {"id": "psp_app_1", "display_name": "PSP App 1", "type": "tpap_app", "region": "ap-south-1", "criticality": 5},
+    {"id": "psp_app_2", "display_name": "PSP App 2", "type": "tpap_app", "region": "ap-south-1", "criticality": 5},
+    {"id": "sponsor_bank_1", "display_name": "Sponsor Bank 1", "type": "psp_bank", "region": "ap-south-1", "criticality": 5},
+    {"id": "payment_gateway_1", "display_name": "Payment Gateway 1", "type": "gateway", "region": "ap-south-1", "criticality": 4},
+    {"id": "npci_switch", "display_name": "NPCI Switch", "type": "switch", "region": "ap-south-1", "criticality": 5},
+    {"id": "bank_a", "display_name": "Bank A", "type": "bank", "region": "ap-south-1", "criticality": 4},
+    {"id": "bank_b", "display_name": "Bank B", "type": "bank", "region": "ap-south-2", "criticality": 4},
+    {"id": "bank_c", "display_name": "Bank C", "type": "bank", "region": "ap-south-2", "criticality": 3},
+    {"id": "status_check_api", "display_name": "Status Check API", "type": "api", "region": "ap-south-1", "criticality": 3},
+    {"id": "merchant_cluster_1", "display_name": "Merchant Cluster 1", "type": "merchant", "region": "ap-south-1", "criticality": 3},
+    {"id": "merchant_cluster_2", "display_name": "Merchant Cluster 2", "type": "merchant", "region": "ap-south-2", "criticality": 3},
+    {"id": "cloud_region_1", "display_name": "Cloud Region 1", "type": "cloud", "region": "ap-south-1", "criticality": 4}
+  ],
+  "edges": [
+    {"source": "psp_app_1", "target": "sponsor_bank_1", "relation": "depends_on", "dependency_type": "hard", "propagation_prob": 0.8, "delay_min_mean": 1.0, "retry_sensitive": false, "basis": "Hard dep: PSP routes through sponsor bank"},
+    {"source": "psp_app_2", "target": "sponsor_bank_1", "relation": "depends_on", "dependency_type": "hard", "propagation_prob": 0.8, "delay_min_mean": 1.0, "retry_sensitive": false, "basis": "Hard dep: same as psp_app_1"},
+    {"source": "psp_app_1", "target": "status_check_api", "relation": "depends_on", "dependency_type": "soft", "propagation_prob": 0.35, "delay_min_mean": 1.5, "retry_sensitive": true, "basis": "Soft dep with retries: status check adds latency on failure"},
+    {"source": "psp_app_2", "target": "status_check_api", "relation": "depends_on", "dependency_type": "soft", "propagation_prob": 0.35, "delay_min_mean": 1.5, "retry_sensitive": true, "basis": "Soft dep with retries: same as psp_app_2"},
+    {"source": "sponsor_bank_1", "target": "npci_switch", "relation": "depends_on", "dependency_type": "hard", "propagation_prob": 0.8, "delay_min_mean": 1.0, "retry_sensitive": false, "basis": "Hard dep: sponsor bank routes through NPCI switch"},
+    {"source": "npci_switch", "target": "bank_a", "relation": "depends_on", "dependency_type": "soft", "propagation_prob": 0.35, "delay_min_mean": 2.0, "retry_sensitive": false, "basis": "Soft dep: partial dependency (50% volume)"},
+    {"source": "npci_switch", "target": "bank_b", "relation": "depends_on", "dependency_type": "soft", "propagation_prob": 0.35, "delay_min_mean": 2.0, "retry_sensitive": false, "basis": "Soft dep: partial dependency (30% volume)"},
+    {"source": "npci_switch", "target": "bank_c", "relation": "depends_on", "dependency_type": "soft", "propagation_prob": 0.35, "delay_min_mean": 2.0, "retry_sensitive": false, "basis": "Soft dep: partial dependency (20% volume)"},
+    {"source": "status_check_api", "target": "bank_a", "relation": "depends_on", "dependency_type": "soft", "propagation_prob": 0.35, "delay_min_mean": 1.5, "retry_sensitive": true, "basis": "Soft retryable: status check queries bank A"},
+    {"source": "status_check_api", "target": "bank_b", "relation": "depends_on", "dependency_type": "soft", "propagation_prob": 0.35, "delay_min_mean": 1.5, "retry_sensitive": true, "basis": "Soft retryable: status check queries bank B"},
+    {"source": "status_check_api", "target": "bank_c", "relation": "depends_on", "dependency_type": "soft", "propagation_prob": 0.35, "delay_min_mean": 1.5, "retry_sensitive": true, "basis": "Soft retryable: status check queries bank C"},
+    {"source": "payment_gateway_1", "target": "sponsor_bank_1", "relation": "depends_on", "dependency_type": "hard", "propagation_prob": 0.8, "delay_min_mean": 1.0, "retry_sensitive": false, "basis": "Hard dep: gateway routes through sponsor bank"},
+    {"source": "payment_gateway_1", "target": "cloud_region_1", "relation": "depends_on", "dependency_type": "hard", "propagation_prob": 0.8, "delay_min_mean": 1.0, "retry_sensitive": false, "basis": "Hard dep: gateway uses cloud region 1"},
+    {"source": "merchant_cluster_1", "target": "payment_gateway_1", "relation": "depends_on", "dependency_type": "hard", "propagation_prob": 0.8, "delay_min_mean": 1.0, "retry_sensitive": false, "basis": "Hard dep: merchants route through gateway"},
+    {"source": "merchant_cluster_2", "target": "payment_gateway_1", "relation": "depends_on", "dependency_type": "hard", "propagation_prob": 0.8, "delay_min_mean": 1.0, "retry_sensitive": false, "basis": "Hard dep: same as merchant cluster 1"},
+    {"source": "merchant_cluster_1", "target": "bank_a", "relation": "depends_on", "dependency_type": "soft", "propagation_prob": 0.35, "delay_min_mean": 2.0, "retry_sensitive": false, "basis": "Soft dep: direct bank A route"},
+    {"source": "merchant_cluster_2", "target": "bank_b", "relation": "depends_on", "dependency_type": "soft", "propagation_prob": 0.35, "delay_min_mean": 2.0, "retry_sensitive": false, "basis": "Soft dep: direct bank B route"},
+    {"source": "bank_b", "target": "cloud_region_1", "relation": "depends_on", "dependency_type": "hard", "propagation_prob": 0.8, "delay_min_mean": 1.0, "retry_sensitive": false, "basis": "Hard dep: bank B stores in cloud region 1"},
+    {"source": "bank_c", "target": "cloud_region_1", "relation": "depends_on", "dependency_type": "hard", "propagation_prob": 0.8, "delay_min_mean": 1.0, "retry_sensitive": false, "basis": "Hard dep: bank C stores in cloud region 1"}
+  ]
+}

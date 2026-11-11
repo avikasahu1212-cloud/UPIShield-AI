@@ -1,0 +1,113 @@
+# UPIShield Infrastructure
+# Kafka (KRaft mode, single node) + Neo4j Community
+# Usage: docker compose up -d
+#        docker compose --profile monitoring up -d
+
+services:
+  kafka:
+    image: apache/kafka:3.9.0
+    container_name: upishield-kafka
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_LOG_DIRS: /tmp/kafka-logs
+      KAFKA_CONTROLLER_SERVER_LISTENERS: CONTROLLER://0.0.0.0:9093
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-broker-api-versions.sh --bootstrap-server localhost:9092 > /dev/null 2>&1"]
+      interval: 10s
+      timeout: 10s
+      retries: 30
+      start_period: 30s
+    networks:
+      - upishield-net
+
+  neo4j:
+    image: neo4j:2026.02.0
+    container_name: upishield-neo4j
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    environment:
+      NEO4J_AUTH: neo4j/upishield_dev_password
+      NEO4J_PLANNER_IMPL: CYPHER Planner=v3
+      NEO4J_db_tx__log_rotation_retention__policy: "false"
+      NEO4J_dbms_memory_heap_max__size: 512M
+      NEO4J_dbms_memory_pagecache_size: 256M
+    volumes:
+      - neo4j_data:/data
+      - neo4j_logs:/logs
+      - neo4j_import:/var/lib/neo4j/import
+      - neo4j_plugins:/var/lib/neo4j/plugins
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s http://localhost:7474 || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 30
+      start_period: 30s
+    networks:
+      - upishield-net
+
+  # Optional: Prometheus (scrapes app /metrics)
+  prometheus:
+    image: prom/prometheus:v2.55.0
+    container_name: upishield-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--storage.tsdb.retention.time=7d"
+    depends_on:
+      - kafka
+    profiles:
+      - monitoring
+    networks:
+      - upishield-net
+
+  # Optional: Grafana (provisioned datasource + dashboard)
+  grafana:
+    image: grafana/grafana:11.3.0
+    container_name: upishield-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_INSTALL_PLUGINS: grafana-clock-panel
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+    depends_on:
+      - prometheus
+    profiles:
+      - monitoring
+    networks:
+      - upishield-net
+
+volumes:
+  neo4j_data:
+  neo4j_logs:
+  neo4j_import:
+  neo4j_plugins:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  upishield-net:
+    driver: bridge

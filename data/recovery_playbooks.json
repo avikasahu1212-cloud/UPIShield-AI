@@ -1,0 +1,100 @@
+{
+  "playbooks": [
+    {
+      "id": "PB-THROTTLE-RETRY",
+      "name": "Throttle Retry Traffic",
+      "description": "Reduce retry traffic by 80% on the affected node to break retry storms. Idempotent and safe.",
+      "action_type": "throttle",
+      "applicable_node_types": ["tpap_app", "api", "gateway"],
+      "properties": {
+        "idempotent": true,
+        "touches_pending_txns": false,
+        "requires_status_check_first": false
+      },
+      "expected_effect": {"latency_reduction_pct": 40, "timeout_reduction_pct": 60, "success_rate_improvement_pct": 15},
+      "estimated_time_to_effect_min": 2,
+      "risk_level": 1,
+      "requires_approval": true
+    },
+    {
+      "id": "PB-STATUS-CHECK-FIRST",
+      "name": "Status Check Before Action",
+      "description": "Run a status check on upstream dependencies before proceeding with transactions. Adds latency but prevents cascading failures.",
+      "action_type": "verify",
+      "applicable_node_types": ["tpap_app", "gateway"],
+      "properties": {
+        "idempotent": true,
+        "touches_pending_txns": false,
+        "requires_status_check_first": false
+      },
+      "expected_effect": {"latency_increase_pct": 10, "timeout_reduction_pct": 50, "success_rate_improvement_pct": 25},
+      "estimated_time_to_effect_min": 1,
+      "risk_level": 2,
+      "requires_approval": true
+    },
+    {
+      "id": "PB-CIRCUIT-BREAK",
+      "name": "Circuit Breaker Activation",
+      "description": "Open circuit breaker for the failing dependency. Stops traffic to the degraded node immediately. Fast but causes transaction failures.",
+      "action_type": "circuit_break",
+      "applicable_node_types": ["tpap_app", "gateway", "psp_bank"],
+      "properties": {
+        "idempotent": true,
+        "touches_pending_txns": false,
+        "requires_status_check_first": true
+      },
+      "expected_effect": {"latency_reduction_pct": 70, "timeout_reduction_pct": 80, "success_rate_improvement_pct": 30},
+      "estimated_time_to_effect_min": 1,
+      "risk_level": 3,
+      "requires_approval": true
+    },
+    {
+      "id": "PB-REROUTE-BACKUP",
+      "name": "Reroute to Backup Path",
+      "description": "Reroute traffic to a backup path or secondary bank. Requires backup capacity to be available.",
+      "action_type": "reroute",
+      "applicable_node_types": ["tpap_app", "gateway", "psp_bank", "bank"],
+      "properties": {
+        "idempotent": false,
+        "touches_pending_txns": false,
+        "requires_status_check_first": true
+      },
+      "expected_effect": {"latency_reduction_pct": 50, "timeout_reduction_pct": 70, "success_rate_improvement_pct": 35},
+      "estimated_time_to_effect_min": 5,
+      "risk_level": 2,
+      "requires_approval": true
+    },
+    {
+      "id": "PB-GATEWAY-FAILOVER",
+      "name": "Gateway Failover",
+      "description": "Failover payment gateway to a secondary provider. Full switchover required.",
+      "action_type": "failover",
+      "applicable_node_types": ["gateway"],
+      "properties": {
+        "idempotent": false,
+        "touches_pending_txns": true,
+        "requires_status_check_first": true
+      },
+      "expected_effect": {"latency_reduction_pct": 60, "timeout_reduction_pct": 90, "success_rate_improvement_pct": 45},
+      "estimated_time_to_effect_min": 10,
+      "risk_level": 4,
+      "requires_approval": true
+    },
+    {
+      "id": "PB-REPLAY-FAILED",
+      "name": "Replay Failed Transactions",
+      "description": "Resubmit all failed transactions with unknown status. UNSAFE: may cause duplicate charges. Only use as last resort after manual verification.",
+      "action_type": "replay",
+      "applicable_node_types": ["tpap_app", "gateway", "psp_bank", "bank"],
+      "properties": {
+        "idempotent": false,
+        "touches_pending_txns": true,
+        "requires_status_check_first": true
+      },
+      "expected_effect": {"latency_reduction_pct": 20, "timeout_reduction_pct": 30, "success_rate_improvement_pct": 20},
+      "estimated_time_to_effect_min": 15,
+      "risk_level": 5,
+      "requires_approval": true
+    }
+  ]
+}
