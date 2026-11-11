@@ -1,0 +1,29 @@
+# Virtual environment
+.venv/
+venv/
+env/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+*.egg
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Data / Artifacts / Reports (generated)
+data/telemetry.csv
+data/incidents.csv
+data/*.png
+artifacts/
+reports/
+data/runtime.db
+
+# Docker
+*.pid

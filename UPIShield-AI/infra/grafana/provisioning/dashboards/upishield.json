@@ -1,0 +1,205 @@
+﻿{
+    "id":  null,
+    "timezone":  "",
+    "timepicker":  {
+
+                   },
+    "style":  "dark",
+    "time":  {
+                 "to":  "now",
+                 "from":  "now-1h"
+             },
+    "graphTooltip":  0,
+    "liveNow":  false,
+    "annotations":  {
+                        "list":  [
+
+                                 ]
+                    },
+    "links":  [
+
+              ],
+    "panels":  [
+                   {
+                       "id":  1,
+                       "fieldConfig":  {
+                                           "defaults":  {
+                                                            "unit":  "percentunit"
+                                                        },
+                                           "overrides":  [
+
+                                                         ]
+                                       },
+                       "targets":  [
+                                       {
+                                           "datasource":  {
+                                                              "type":  "prometheus",
+                                                              "uid":  "Prometheus"
+                                                          },
+                                           "expr":  "upishield_success_rate_node",
+                                           "refId":  "A"
+                                       }
+                                   ],
+                       "datasource":  {
+                                          "type":  "prometheus",
+                                          "uid":  "Prometheus"
+                                      },
+                       "type":  "timeseries",
+                       "title":  "Success Rate by Node",
+                       "gridPos":  {
+                                       "y":  0,
+                                       "w":  12,
+                                       "x":  0,
+                                       "h":  8
+                                   }
+                   },
+                   {
+                       "id":  2,
+                       "fieldConfig":  {
+                                           "defaults":  {
+                                                            "unit":  "ms"
+                                                        },
+                                           "overrides":  [
+
+                                                         ]
+                                       },
+                       "targets":  [
+                                       {
+                                           "datasource":  {
+                                                              "type":  "prometheus",
+                                                              "uid":  "Prometheus"
+                                                          },
+                                           "expr":  "upishield_p95_latency_ms_node",
+                                           "refId":  "A"
+                                       }
+                                   ],
+                       "datasource":  {
+                                          "type":  "prometheus",
+                                          "uid":  "Prometheus"
+                                      },
+                       "type":  "timeseries",
+                       "title":  "P95 Latency by Node",
+                       "gridPos":  {
+                                       "y":  0,
+                                       "w":  12,
+                                       "x":  12,
+                                       "h":  8
+                                   }
+                   },
+                   {
+                       "id":  3,
+                       "fieldConfig":  {
+                                           "defaults":  {
+                                                            "unit":  "short"
+                                                        },
+                                           "overrides":  [
+
+                                                         ]
+                                       },
+                       "targets":  [
+                                       {
+                                           "datasource":  {
+                                                              "type":  "prometheus",
+                                                              "uid":  "Prometheus"
+                                                          },
+                                           "expr":  "upishield_active_alerts",
+                                           "refId":  "A"
+                                       }
+                                   ],
+                       "datasource":  {
+                                          "type":  "prometheus",
+                                          "uid":  "Prometheus"
+                                      },
+                       "type":  "stat",
+                       "title":  "Active Alerts",
+                       "gridPos":  {
+                                       "y":  8,
+                                       "w":  24,
+                                       "x":  0,
+                                       "h":  4
+                                   }
+                   },
+                   {
+                       "id":  4,
+                       "fieldConfig":  {
+                                           "defaults":  {
+                                                            "unit":  "percentunit"
+                                                        },
+                                           "overrides":  [
+
+                                                         ]
+                                       },
+                       "targets":  [
+                                       {
+                                           "datasource":  {
+                                                              "type":  "prometheus",
+                                                              "uid":  "Prometheus"
+                                                          },
+                                           "expr":  "upishield_anomaly_score_node",
+                                           "refId":  "A"
+                                       }
+                                   ],
+                       "datasource":  {
+                                          "type":  "prometheus",
+                                          "uid":  "Prometheus"
+                                      },
+                       "type":  "timeseries",
+                       "title":  "Anomaly Score by Node",
+                       "gridPos":  {
+                                       "y":  12,
+                                       "w":  12,
+                                       "x":  0,
+                                       "h":  8
+                                   }
+                   },
+                   {
+                       "id":  5,
+                       "fieldConfig":  {
+                                           "defaults":  {
+                                                            "unit":  "short"
+                                                        },
+                                           "overrides":  [
+
+                                                         ]
+                                       },
+                       "targets":  [
+                                       {
+                                           "datasource":  {
+                                                              "type":  "prometheus",
+                                                              "uid":  "Prometheus"
+                                                          },
+                                           "expr":  "rate(upishield_events_consumed_total[5m])",
+                                           "refId":  "A"
+                                       }
+                                   ],
+                       "datasource":  {
+                                          "type":  "prometheus",
+                                          "uid":  "Prometheus"
+                                      },
+                       "type":  "timeseries",
+                       "title":  "Events Consumed (by group)",
+                       "gridPos":  {
+                                       "y":  12,
+                                       "w":  12,
+                                       "x":  12,
+                                       "h":  8
+                                   }
+                   }
+               ],
+    "refresh":  "5s",
+    "uid":  "upishield-dashboard",
+    "tags":  [
+                 "upishield",
+                 "upi"
+             ],
+    "schemaVersion":  39,
+    "version":  1,
+    "editable":  true,
+    "templating":  {
+                       "list":  [
+
+                                ]
+                   },
+    "fiscalYearStartMonth":  0,
+    "title":  "UPIShield Dashboard"
+}
